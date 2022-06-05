@@ -37,4 +37,13 @@ const login = asyncHandler(async (req, res, next) => {
   sendToken(user, 200, res);
 });
 
-export { register, login };
+//Login User
+const logout = asyncHandler(async (req, res, next) => {
+  res.cookie('token', null, {
+    expires: new Date(Date.now()),
+    httpOnly: true,
+  });
+  res.status(200).json({ message: 'Logout Successfully' });
+});
+
+export { register, login, logout };
