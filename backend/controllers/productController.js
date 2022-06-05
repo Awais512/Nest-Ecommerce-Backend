@@ -5,9 +5,16 @@ import Features from '../utils/Features.js';
 
 //Get all Products
 const getProducts = asyncHandler(async (req, res) => {
-  const features = new Features(Product.find(), req.query).search().filter();
+  const resultPerPage = 2;
+  const productCount = await Product.countDocuments();
+  const features = new Features(Product.find(), req.query)
+    .search()
+    .filter()
+    .pagination(resultPerPage);
   const products = await features.query;
-  res.status(200).json({ success: true, products });
+  res
+    .status(200)
+    .json({ success: true, resultPerPage, productCount, products });
 });
 
 //Get Single Product
