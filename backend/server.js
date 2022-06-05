@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDb from './config/db.js';
 import errorHandler from './middlewares/error.js';
+import cookieParser from 'cookie-parser';
 dotenv.config({ path: 'backend/config/.env' });
 
 //Import Route Files
@@ -18,6 +19,7 @@ connectDb();
 
 //App Middlewares
 app.use(express.json());
+app.use(cookieParser());
 if (process.env.NODE_ENV === 'dev') {
   app.use(morgan('dev'));
 }

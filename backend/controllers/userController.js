@@ -1,6 +1,7 @@
 import User from '../models/UserModel.js';
 import asyncHandler from 'express-async-handler';
 import ErrorResponse from '../utils/ErrorResponse.js';
+import sendToken from '../utils/jwtToken.js';
 
 //Register User
 const register = asyncHandler(async (req, res) => {
@@ -15,8 +16,7 @@ const register = asyncHandler(async (req, res) => {
       url: 'https://res.cloudinary.com/awais512/image/upload/v1619789740/awais_285baad08a.jpg',
     },
   });
-  const token = user.getJwtToken();
-  res.status(201).json({ success: true, token });
+  sendToken(user, 200, res);
 });
 
 //Login User
@@ -34,8 +34,7 @@ const login = asyncHandler(async (req, res, next) => {
   if (!isPasswordMatch) {
     return next(new ErrorResponse('Password does not Match', 400));
   }
-  const token = user.getJwtToken();
-  res.status(201).json({ success: true, token, user });
+  sendToken(user, 200, res);
 });
 
 export { register, login };
