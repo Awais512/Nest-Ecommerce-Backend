@@ -1,28 +1,55 @@
 import asyncHandler from 'express-async-handler';
+import Product from '../models/ProductModel.js';
 
 //Get all Products
 const getProducts = asyncHandler(async (req, res) => {
-  res.send('All Products');
+  const products = await Product.find();
+  res.status(200).json({ success: true, products });
 });
 
 //Get Sungle Product
 const getProduct = asyncHandler(async (req, res) => {
-  res.send('Get Single Product');
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    return res.status(404).json('Product Not Found');
+  }
+  res.status(200).json(product);
 });
 
-//Create Product
+//Create Product By Admin
 const createProduct = asyncHandler(async (req, res) => {
-  res.send('Create Product');
+  const product = await Product.create(req.body);
+  res.status(201).json({ success: true, product });
 });
 
-//Update Product
+//Update Product by Admin
 const updateProduct = asyncHandler(async (req, res) => {
-  res.send('Update Product');
+  let product = await Product.findById(req.params.id);
+  if (!product) {
+    return res
+      .status(404)
+      .json({ success: false, message: 'No Product Found' });
+  }
+  product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+    useUnified: false,
+  });
+  res.status(200).json({ success: true, product });
 });
 
-//Delete Product
+//Delete Product By Admin
 const deleteProduct = asyncHandler(async (req, res) => {
-  res.send('Delete Product');
+  let product = await Product.findById(req.params.id);
+  if (!product) {
+    return res
+      .status(404)
+      .json({ success: false, message: 'No Product Found' });
+  }
+  product = await Product.findByIdAndDelete(req.params.id);
+  res
+    .status(200)
+    .json({ success: true, message: 'Product Deleted Successfully' });
 });
 
 export { getProducts, getProduct, createProduct, updateProduct, deleteProduct };
