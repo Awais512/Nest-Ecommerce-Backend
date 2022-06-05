@@ -1,10 +1,12 @@
 import asyncHandler from 'express-async-handler';
 import Product from '../models/ProductModel.js';
 import ErrorResponse from '../utils/ErrorResponse.js';
+import Features from '../utils/Features.js';
 
 //Get all Products
 const getProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find();
+  const features = new Features(Product.find(), req.query).search();
+  const products = await features.query;
   res.status(200).json({ success: true, products });
 });
 
