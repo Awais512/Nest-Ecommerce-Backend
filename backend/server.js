@@ -5,6 +5,9 @@ import dotenv from 'dotenv';
 import connectDb from './config/db.js';
 dotenv.config({ path: 'backend/config/.env' });
 
+//Import Route Files
+import productRoute from './routes/productRoutes.js';
+
 const app = express();
 const PORT = process.env.PORT;
 
@@ -17,5 +20,8 @@ if (process.env.NODE_ENV === 'dev') {
   app.use(morgan('dev'));
 }
 app.use(cors());
+
+//Route Middlewares
+app.use('/api/products', productRoute);
 
 app.listen(PORT, () => console.log(`Server is Running on Port: ${PORT}`));
