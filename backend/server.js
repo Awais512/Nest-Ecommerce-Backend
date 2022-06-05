@@ -7,6 +7,7 @@ dotenv.config({ path: 'backend/config/.env' });
 
 //Import Route Files
 import productRoute from './routes/productRoutes.js';
+import errorHandler from './middlewares/error.js';
 
 const app = express();
 const PORT = process.env.PORT;
@@ -23,5 +24,6 @@ app.use(cors());
 
 //Route Middlewares
 app.use('/api/products', productRoute);
+app.use(errorHandler);
 
 app.listen(PORT, () => console.log(`Server is Running on Port: ${PORT}`));

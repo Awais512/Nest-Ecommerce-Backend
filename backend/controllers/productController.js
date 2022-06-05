@@ -1,5 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import Product from '../models/ProductModel.js';
+import ErrorResponse from '../utils/ErrorResponse.js';
 
 //Get all Products
 const getProducts = asyncHandler(async (req, res) => {
@@ -7,11 +8,14 @@ const getProducts = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, products });
 });
 
-//Get Sungle Product
-const getProduct = asyncHandler(async (req, res) => {
+//Get Single Product
+const getProduct = asyncHandler(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
   if (!product) {
-    return res.status(404).json('Product Not Found');
+    return new ErrorResponse(
+      `Product does not found with the id of ${req.params.id}`,
+      404
+    );
   }
   res.status(200).json(product);
 });
@@ -26,9 +30,10 @@ const createProduct = asyncHandler(async (req, res) => {
 const updateProduct = asyncHandler(async (req, res) => {
   let product = await Product.findById(req.params.id);
   if (!product) {
-    return res
-      .status(404)
-      .json({ success: false, message: 'No Product Found' });
+    return new ErrorResponse(
+      `Product does not found with the id of ${req.params.id}`,
+      404
+    );
   }
   product = await Product.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
@@ -42,9 +47,10 @@ const updateProduct = asyncHandler(async (req, res) => {
 const deleteProduct = asyncHandler(async (req, res) => {
   let product = await Product.findById(req.params.id);
   if (!product) {
-    return res
-      .status(404)
-      .json({ success: false, message: 'No Product Found' });
+    return new ErrorResponse(
+      `Product does not found with the id of ${req.params.id}`,
+      404
+    );
   }
   product = await Product.findByIdAndDelete(req.params.id);
   res
