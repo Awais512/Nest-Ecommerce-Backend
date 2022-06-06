@@ -125,4 +125,43 @@ const resetPassword = asyncHandler(async (req, res, next) => {
   sendToken(user, 200, res);
 });
 
-export { register, login, logout, forgotPassword, resetPassword };
+//  Get user Details
+const userDetails = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+// Update User Password
+const updatePassword = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user.id).select('+password');
+
+  const isPasswordMatched = await user.comparePassword(req.body.oldPassword);
+
+  if (!isPasswordMatched) {
+    return next(new ErrorResponse('Old Password is incorrect', 400));
+  }
+
+  if (req.body.newPassword !== req.body.confirmPassword) {
+    return next(new ErrorResponse('Password not matched with each other', 400));
+  }
+
+  user.password = req.body.newPassword;
+
+  await user.save();
+
+  sendToken(user, 200, res);
+});
+
+export {
+  register,
+  login,
+  logout,
+  forgotPassword,
+  resetPassword,
+  userDetails,
+  updatePassword,
+};
