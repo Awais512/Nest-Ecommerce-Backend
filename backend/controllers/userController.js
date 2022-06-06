@@ -4,6 +4,7 @@ import ErrorResponse from '../utils/ErrorResponse.js';
 import sendToken from '../utils/jwtToken.js';
 import sendMail from '../utils/sendMail.js';
 import crypto from 'crypto';
+import cloudinary from 'cloudinary';
 
 //Register User
 const register = asyncHandler(async (req, res) => {
@@ -156,6 +157,106 @@ const updatePassword = asyncHandler(async (req, res, next) => {
   sendToken(user, 200, res);
 });
 
+// Update User Profile
+const updateProfile = asyncHandler(async (req, res, next) => {
+  const newUserData = {
+    name: req.body.name,
+    email: req.body.email,
+  };
+
+  //  if (req.body.avatar !== "") {
+  //   const user = await User.findById(req.user.id);
+
+  //   const imageId = user.avatar.public_id;
+
+  //   await cloudinary.v2.uploader.destroy(imageId);
+
+  //   const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+  //     folder: "avatars",
+  //     width: 150,
+  //     crop: "scale",
+  //   });
+  //   newUserData.avatar = {
+  //     public_id: myCloud.public_id,
+  //     url: myCloud.secure_url,
+  //   };
+  // }
+
+  const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
+    new: true,
+    runValidator: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+// Get All users ---Admin
+const getAllUsers = asyncHandler(async (req, res, next) => {
+  const users = await User.find();
+
+  res.status(200).json({
+    success: true,
+    users,
+  });
+});
+
+// Get Single User Details ---Admin
+const getSingleUser = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(new ErrorResponse('User is not found with this id', 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+// Change user Role --Admin
+const updateUserRole = asyncHandler(async (req, res, next) => {
+  const newUserData = {
+    name: req.body.name,
+    email: req.body.email,
+    role: req.body.role,
+  };
+  const user = await User.findByIdAndUpdate(req.params.id, newUserData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+// Delete User ---Admin
+const deleteUser = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  // const imageId = user.avatar.public_id;
+
+  // await cloudinary.v2.uploader.destroy(imageId);
+
+  if (!user) {
+    return next(new ErrorResponse('User is not found with this id', 400));
+  }
+
+  await user.remove();
+
+  res.status(200).json({
+    success: true,
+    message: 'User deleted successfully',
+  });
+});
+
 export {
   register,
   login,
@@ -164,4 +265,9 @@ export {
   resetPassword,
   userDetails,
   updatePassword,
+  updateProfile,
+  getAllUsers,
+  getSingleUser,
+  updateUserRole,
+  deleteUser,
 };
