@@ -2,6 +2,7 @@ import User from '../models/UserModel.js';
 import asyncHandler from 'express-async-handler';
 import ErrorResponse from '../utils/ErrorResponse.js';
 import sendToken from '../utils/jwtToken.js';
+import sendMail from '../utils/sendMail.js';
 
 //Register User
 const register = asyncHandler(async (req, res) => {
@@ -37,7 +38,7 @@ const login = asyncHandler(async (req, res, next) => {
   sendToken(user, 200, res);
 });
 
-//Login User
+//Logout User
 const logout = asyncHandler(async (req, res, next) => {
   res.cookie('token', null, {
     expires: new Date(Date.now()),
@@ -46,4 +47,42 @@ const logout = asyncHandler(async (req, res, next) => {
   res.status(200).json({ message: 'Logout Successfully' });
 });
 
-export { register, login, logout };
+//Forgot Password
+const forgotPassword = asyncHandler(async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new ErrorResponse('User not Found with this email', 400));
+  }
+  const resetToken = user.getResetToken();
+  await user.save({
+    validateBeforeSave: false,
+  });
+
+  const resetPasswordUrl = `${req.protocol}://${req.get(
+    'host'
+  )}/password/reset/${resetToken}`;
+  const message = `Your password reset token is :- \n\n ${resetPasswordUrl}`;
+  try {
+    await sendMail({
+      email: user.email,
+      subject: `Ecommerce Password Recovery`,
+      message,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Email sent to ${user.email} succesfully`,
+    });
+  } catch (error) {
+    user.resetPasswordToken = undefined;
+    user.resetPasswordTime = undefined;
+
+    await user.save({
+      validateBeforeSave: false,
+    });
+
+    return next(new ErrorResponse(error.message, 500));
+  }
+});
+
+export { register, login, logout, forgotPassword };

@@ -66,20 +66,20 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
 };
 
 // Forgot password
-// userSchema.methods.getResetToken = function () {
-//   // Generating token
-//   const resetToken = crypto.randomBytes(20).toString('hex');
+userSchema.methods.getResetToken = function () {
+  // Generating token
+  const resetToken = crypto.randomBytes(20).toString('hex');
 
-//   //    hashing and adding resetPasswordToken to userSchema
-//   this.resetPasswordToken = crypto
-//     .createHash('sha256')
-//     .update(resetToken)
-//     .digest('hex');
+  //    hashing and adding resetPasswordToken to userSchema
+  this.resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
 
-//   this.resetPasswordTime = Date.now() + 15 * 60 * 1000;
+  this.resetPasswordTime = Date.now() + 15 * 60 * 1000;
 
-//   return resetToken;
-// };
+  return resetToken;
+};
 
 const User = mongoose.model('User', userSchema);
 export default User;
