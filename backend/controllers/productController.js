@@ -109,6 +109,67 @@ const createProductReview = asyncHandler(async (req, res) => {
   });
 });
 
+// Get All reviews of a single product
+const getSingleProductReviews = asyncHandler(async (req, res, next) => {
+  const product = await Product.findById(req.query.id);
+
+  if (!product) {
+    return next(new ErrorResponse('Product is not found with this id', 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    reviews: product.reviews,
+  });
+});
+
+// Delete Review --Admin
+const deleteReview = asyncHandler(async (req, res, next) => {
+  const product = await Product.findById(req.query.productId);
+
+  if (!product) {
+    return next(new ErrorResponse('Product not found with this id', 404));
+  }
+
+  const reviews = product.reviews.filter(
+    (rev) => rev._id.toString() !== req.query.id.toString()
+  );
+
+  let avg = 0;
+
+  reviews.forEach((rev) => {
+    avg += rev.rating;
+  });
+
+  let ratings = 0;
+
+  if (reviews.length === 0) {
+    ratings = 0;
+  } else {
+    ratings = avg / reviews.length;
+  }
+
+  const numOfReviews = reviews.length;
+
+  await Product.findByIdAndUpdate(
+    req.query.productId,
+    {
+      reviews,
+      ratings,
+      numOfReviews,
+    },
+    {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
+
+  res.status(200).json({
+    success: true,
+  });
+});
+
 export {
   getProducts,
   getProduct,
@@ -116,4 +177,6 @@ export {
   updateProduct,
   deleteProduct,
   createProductReview,
+  getSingleProductReviews,
+  deleteReview,
 };
