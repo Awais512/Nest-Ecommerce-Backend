@@ -3,6 +3,7 @@ import asyncHandler from 'express-async-handler';
 import ErrorResponse from '../utils/ErrorResponse.js';
 import sendToken from '../utils/jwtToken.js';
 import sendMail from '../utils/sendMail.js';
+import crypto from 'crypto';
 
 //Register User
 const register = asyncHandler(async (req, res) => {
@@ -85,4 +86,43 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
   }
 });
 
-export { register, login, logout, forgotPassword };
+// Reset Password
+const resetPassword = asyncHandler(async (req, res, next) => {
+  // Create Token hash
+
+  const resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordTime: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(
+      new ErrorResponse(
+        'Reset password url is invalid or has been expired',
+        400
+      )
+    );
+  }
+
+  if (req.body.password !== req.body.confirmPassword) {
+    return next(
+      new ErrorResponse('Password is not matched with the new password', 400)
+    );
+  }
+
+  user.password = req.body.password;
+
+  user.resetPasswordToken = undefined;
+  user.resetPasswordTime = undefined;
+
+  await user.save();
+
+  sendToken(user, 200, res);
+});
+
+export { register, login, logout, forgotPassword, resetPassword };
