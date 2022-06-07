@@ -10,6 +10,7 @@ dotenv.config({ path: 'backend/config/.env' });
 //Import Route Files
 import productRoute from './routes/productRoutes.js';
 import userRoute from './routes/userRoutes.js';
+import orderRoute from './routes/orderRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT;
@@ -28,6 +29,7 @@ app.use(cors());
 //Route Middlewares
 app.use('/api/products', productRoute);
 app.use('/api/users', userRoute);
+app.use('/api/orders', orderRoute);
 app.use(errorHandler);
 
 app.listen(PORT, () => console.log(`Server is Running on Port: ${PORT}`));
